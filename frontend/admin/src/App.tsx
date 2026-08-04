@@ -7,17 +7,8 @@ import EventList from '@/pages/events/EventList';
 import EventForm from '@/pages/events/EventForm';
 import PostList from '@/pages/blog/PostList';
 import PostEditor from '@/pages/blog/PostEditor';
-import BadgeList from '@/pages/badges/BadgeList';
-import BadgeForm from '@/pages/badges/BadgeForm';
-
-function StubPage({ title }: { title: string }) {
-  return (
-    <div className="text-center py-16">
-      <h2 className="font-heading text-2xl text-gray-600">{title}</h2>
-      <p className="text-gray-400 mt-2">Módulo en desarrollo</p>
-    </div>
-  );
-}
+import MediaLibrary from '@/pages/media/MediaLibrary';
+import Settings from '@/pages/settings/Settings';
 
 export default function App() {
   return (
@@ -44,15 +35,10 @@ export default function App() {
         <Route path="blog/new" element={<PostEditor />} />
         <Route path="blog/:id" element={<PostEditor />} />
 
-        {/* Badges */}
-        <Route path="badges" element={<BadgeList />} />
-        <Route path="badges/new" element={<BadgeForm />} />
-        <Route path="badges/:id" element={<BadgeForm />} />
+        {/* Media */}
+        <Route path="media" element={<MediaLibrary />} />
 
-        {/* Stubs */}
-        <Route path="members" element={<StubPage title="Gestión de Miembros" />} />
-        <Route path="media" element={<StubPage title="Biblioteca de Media" />} />
-        <Route path="settings" element={<StubPage title="Configuración" />} />
+        <Route path="settings" element={<Settings />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/dashboard" replace />} />

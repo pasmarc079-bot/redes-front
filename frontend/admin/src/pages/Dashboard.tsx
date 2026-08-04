@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FiCalendar, FiFileText, FiAward, FiUsers, FiAlertCircle } from 'react-icons/fi';
+import { FiCalendar, FiFileText, FiAlertCircle } from 'react-icons/fi';
 import axios from 'axios';
 
 const api = axios.create({
@@ -26,38 +26,35 @@ export default function Dashboard() {
   const [stats, setStats] = useState<Record<string, number>>({
     events: 0,
     posts: 0,
-    badges: 0,
-    members: 0,
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
   useEffect(() => {
-    Promise.allSettled([
-      api.get('/events?page=1&limit=1'),
-      api.get('/posts?page=1&limit=1'),
-      api.get('/badges'),
-      api.get('/members'),
-    ]).then(([events, posts, badges, members]) => {
-      setStats({
-        events: events.status === 'fulfilled' ? events.value.data.pagination?.total ?? 0 : 0,
-        posts: posts.status === 'fulfilled' ? posts.value.data.pagination?.total ?? 0 : 0,
-        badges: badges.status === 'fulfilled' ? badges.value.data.length ?? 0 : 0,
-        members: members.status === 'fulfilled' ? members.value.data.length ?? 0 : 0,
+    api
+      .get('/events?page=1&limit=1')
+      .then((events) => {
+        setStats({
+          events: events.data.pagination?.total ?? 0,
+          posts: 0,
+        });
+        setLoading(false);
+      })
+      .catch(() => {
+        setError(true);
+        setLoading(false);
       });
-
-      const hasFailures = [events, posts, badges, members].some((r) => r.status === 'rejected');
-      if (hasFailures) setError(true);
-
-      setLoading(false);
-    });
+    api
+      .get('/posts?page=1&limit=1')
+      .then((posts) => {
+        setStats((prev) => ({ ...prev, posts: posts.data.pagination?.total ?? 0 }));
+      })
+      .catch(() => setError(true));
   }, []);
 
   const cards = [
     { icon: FiCalendar, label: 'Eventos', value: stats.events, color: 'bg-blue-500', link: '/dashboard/events' },
     { icon: FiFileText, label: 'Artículos', value: stats.posts, color: 'bg-green-500', link: '/dashboard/blog' },
-    { icon: FiAward, label: 'Insignias', value: stats.badges, color: 'bg-gold', link: '/dashboard/badges' },
-    { icon: FiUsers, label: 'Miembros', value: stats.members, color: 'bg-purple-500', link: '/dashboard/members' },
   ];
 
   return (
@@ -112,10 +109,10 @@ export default function Dashboard() {
             Nuevo artículo
           </Link>
           <Link
-            to="/dashboard/badges/new"
+            to="/dashboard/media"
             className="btn btn-primary focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2"
           >
-            Nueva insignia
+            Subir media
           </Link>
         </div>
       </div>

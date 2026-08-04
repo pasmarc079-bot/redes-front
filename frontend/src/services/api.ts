@@ -19,18 +19,15 @@ export const postsApi = {
   getTags: () => api.get('/posts/tags'),
 };
 
-export const badgesApi = {
-  getAll: () => api.get('/badges'),
-  getBySlug: (slug: string) => api.get(`/badges/${slug}`),
-};
-
-export const membersApi = {
-  getAll: () => api.get('/members'),
-  getById: (id: string) => api.get(`/members/${id}`),
-};
-
 export const socialApi = {
   getConfigs: () => api.get('/social/configs'),
+};
+
+export const siteApi = {
+  getSettings: () => api.get('/site/settings'),
+  getMenu: (location: string) => api.get(`/site/menu/${location}`),
+  getContent: (section?: string) => api.get('/site/content', { params: section ? { section } : {} }),
+  getServices: () => api.get('/site/services'),
 };
 
 export default api;

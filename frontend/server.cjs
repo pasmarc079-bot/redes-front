@@ -4,7 +4,7 @@ const httpProxy = require("http-proxy");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const BACKEND_URL = process.env.BACKEND_URL || (process.env.NODE_ENV === "production" ? "https://redes-back.seenode.app" : "http://localhost:8080");
+const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:8080";
 
 const FRONTEND_DIR = path.join(__dirname, "dist");
 const ADMIN_DIR = path.join(__dirname, "admin-dist");
