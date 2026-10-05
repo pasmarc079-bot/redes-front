@@ -4,6 +4,7 @@ import { useSiteStore } from '@/stores/siteStore';
 import Seo from '@/components/Seo';
 import SocialChannelsSection from '@/components/social/SocialChannelsSection';
 import ResponsiveCover from '@/components/layout/ResponsiveCover';
+import { normalizeWhatsAppNumber } from '@/utils/phone';
 
 export default function Community() {
   const { settings, fetchSocialConfigs } = useSiteStore();
@@ -14,13 +15,16 @@ export default function Community() {
     fetchSocialConfigs();
   }, []);
 
+  const whatsappNumber = normalizeWhatsAppNumber(settings.whatsapp_number || '593994538859');
+  const whatsappMessage = encodeURIComponent(settings.whatsapp_message || '¡Hola! Quisiera información sobre el Ministerio REDES.');
+
   return (
     <div>
       <Seo title="Comunidad | Ministerio REDES" description="Conéctate con la comunidad del Ministerio Cristiano REDES." />
        <section data-nav-theme="dark" className="relative overflow-hidden bg-dark py-20 md:py-28">
-         <ResponsiveCover desktopImage={settings.community_cover_image_url} mobileImage={settings.community_cover_image_mobile_url} alt="" />
-         {(settings.community_cover_image_url || settings.community_cover_image_mobile_url) && <div className="absolute inset-0 bg-dark/70" aria-hidden="true" />}
-         <div className="container-custom relative z-10 text-center">
+        <ResponsiveCover desktopImage={settings.community_cover_image_url} mobileImage={settings.community_cover_image_mobile_url} alt="" />
+        {(settings.community_cover_image_url || settings.community_cover_image_mobile_url) && <div className="absolute inset-0 bg-dark/70" aria-hidden="true" />}
+        <div className="container-custom relative z-10 text-center">
           <p className="font-heading text-gold uppercase tracking-[0.2em] text-sm mb-4">
             Comunidad
           </p>
@@ -44,7 +48,7 @@ export default function Community() {
             Contáctanos por WhatsApp y sé parte de esta gran familia de fe.
           </p>
           <a
-            href={`https://wa.me/${settings.whatsapp_number || '593994538859'}?text=${encodeURIComponent(settings.whatsapp_message || '¡Hola! Quisiera información sobre el Ministerio REDES.')}`}
+            href={`https://wa.me/${whatsappNumber}?text=${whatsappMessage}`}
             target="_blank"
             rel="noopener noreferrer"
              className="inline-flex items-center gap-3 bg-green-700 text-white px-8 py-4 rounded-full text-lg font-heading font-semibold hover:bg-green-800 hover:scale-105 transition-all duration-200 shadow-lg"

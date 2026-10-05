@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { FiLink, FiMapPin, FiPhone, FiMail } from 'react-icons/fi';
 import { FaFacebook, FaYoutube, FaTiktok, FaWhatsapp, FaInstagram } from 'react-icons/fa6';
 import { useSiteStore } from '../../stores/siteStore';
+import { ensureAbsoluteUrl } from '../../utils/phone';
 
 const iconMap: Record<string, React.ReactNode> = {
   facebook: <FaFacebook size={20} />,
@@ -22,8 +23,8 @@ export default function Footer() {
             <div className="flex items-center gap-3 mb-4">
               <img src={settings.logo_url || '/logo.svg'} alt={settings.site_name || 'REDES'} className="h-10 w-10 logo-on-dark" />
                <p className="font-display text-4xl text-gold tracking-wider" role="heading" aria-level={2}>
-                 {settings.site_name || 'REDES'}
-               </p>
+                {settings.site_name || 'REDES'}
+              </p>
             </div>
             <p className="text-silver text-sm leading-relaxed mb-4">
               {settings.site_description || ''}
@@ -32,13 +33,13 @@ export default function Footer() {
               {socialConfigs.filter(s => s.isActive && s.accountUrl).map((s) => (
                 <a
                   key={s.platform}
-                  href={s.accountUrl!}
+                  href={ensureAbsoluteUrl(s.accountUrl!)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-silver hover:text-gold transition-colors"
                   aria-label={s.platform}
                 >
-                   {iconMap[s.platform] || <FiLink size={20} />}
+                  {iconMap[s.platform] || <FiLink size={20} />}
                 </a>
               ))}
             </div>
@@ -46,8 +47,8 @@ export default function Footer() {
 
           <div>
              <h2 className="font-heading text-gold font-semibold uppercase tracking-wider text-sm mb-4">
-               Navegación
-             </h2>
+              Navegación
+            </h2>
             <ul className="space-y-2">
               {footerMenu.map((item) => (
                 <li key={item.id}>
@@ -64,8 +65,8 @@ export default function Footer() {
 
           <div>
              <h2 className="font-heading text-gold font-semibold uppercase tracking-wider text-sm mb-4">
-               Contacto
-             </h2>
+              Contacto
+            </h2>
             <ul className="space-y-3">
               <li className="flex items-start gap-3 text-silver text-sm">
                 <FiMapPin className="mt-0.5 text-gold flex-shrink-0" />
@@ -83,15 +84,15 @@ export default function Footer() {
                    {settings.email || ''}
                  </a>
                </li>
-               {settings.external_form_url && <li><a href={settings.external_form_url} target="_blank" rel="noopener noreferrer" className="hover:text-gold">Formulario externo</a></li>}
-               {settings.donation_url && <li><a href={settings.donation_url} target="_blank" rel="noopener noreferrer" className="hover:text-gold">Donaciones</a></li>}
-             </ul>
+               {settings.external_form_url && <li><a href={ensureAbsoluteUrl(settings.external_form_url)} target="_blank" rel="noopener noreferrer" className="hover:text-gold">Formulario externo</a></li>}
+               {settings.donation_url && <li><a href={ensureAbsoluteUrl(settings.donation_url)} target="_blank" rel="noopener noreferrer" className="hover:text-gold">Donaciones</a></li>}
+            </ul>
           </div>
 
           <div>
              <h2 className="font-heading text-gold font-semibold uppercase tracking-wider text-sm mb-4">
-               Reuniones
-             </h2>
+              Reuniones
+            </h2>
             <ul className="space-y-2 text-silver text-sm">
               {services.map((s) => (
                 <li key={s.id} className="flex justify-between">

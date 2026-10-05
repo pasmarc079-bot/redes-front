@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
-import { FiChevronDown, FiChevronUp, FiEdit3, FiImage, FiLink, FiMenu, FiPlus, FiSave, FiTrash2, FiX } from 'react-icons/fi';
+import { FiChevronDown, FiChevronUp, FiEdit3, FiImage, FiLink, FiMenu, FiPlus, FiSave, FiTrash2, FiX, FiCheckCircle, FiAlertCircle } from 'react-icons/fi';
 import { showToast } from '@/admin/components/ui/Toast';
 import MediaPicker from '@/admin/components/ui/MediaPicker';
 import { siteApi, socialApi } from '@/services/api';
+import { normalizeWhatsAppNumber, isValidWhatsAppNumber, formatWhatsAppNumber } from '@/utils/phone';
 
 type PageId = 'home' | 'about' | 'events' | 'blog' | 'community' | 'contact';
 type FieldSource = 'content' | 'setting';
@@ -483,15 +484,15 @@ interface ExternalContactSettingsProps {
 function ExternalContactSettings({ settings, socials, updateSetting, updateSocial, addSocial, removeSocial, moveSocial, saveExternal, saving }: ExternalContactSettingsProps) {
   const getSetting = (key: string) => settings.find(item => item.key === key)?.value || '';
   const contactFields = [
-    ['phone', 'Teléfono oficial', 'text'],
-    ['phone_international', 'Teléfono para enlaces', 'text'],
-    ['whatsapp_number', 'WhatsApp oficial', 'text'],
-    ['email', 'Correo electrónico institucional', 'email'],
-    ['address', 'Dirección física completa', 'textarea'],
-    ['google_maps_url', 'Enlace de Google Maps', 'url'],
-    ['external_form_url', 'Formulario externo', 'url'],
-    ['donation_url', 'Enlace de donaciones', 'url'],
-    ['whatsapp_message', 'Mensaje predeterminado de WhatsApp', 'textarea'],
+    ['phone', 'Teléfono oficial', 'text', 'Se muestra en página Nosotros y Footer (solo visual, no es clickeable). Ej: 099 453 8859'],
+    ['phone_international', 'Teléfono para enlaces (tel:)', 'text', 'Usado en botones "Llamar" del Footer y página Contacto. Debe incluir código de país. Ej: +593994538859'],
+    ['whatsapp_number', 'WhatsApp oficial (wa.me)', 'text', 'Usado en botones de WhatsApp (Comunidad, botón flotante, página Contacto). Formato: +593 99 786 7727 o 593997867727. Se limpia automáticamente.'],
+    ['email', 'Correo electrónico institucional', 'email', 'Usado en Footer, página Contacto y formularios. Ej: ministerio@ejemplo.com'],
+    ['address', 'Dirección física completa', 'textarea', 'Usado en Footer, página Contacto, About y Google Maps.'],
+    ['google_maps_url', 'Enlace de Google Maps', 'url', 'Enlace directo a Maps. Si vacío, se genera automáticamente desde la dirección.'],
+    ['external_form_url', 'Formulario externo', 'url', 'Enlace a formulario externo (Google Forms, Typeform, etc.). Opcional.'],
+    ['donation_url', 'Enlace de donaciones', 'url', 'Enlace a plataforma de donaciones. Opcional.'],
+    ['whatsapp_message', 'Mensaje predeterminado de WhatsApp', 'textarea', 'Texto que se precarga al abrir chat. Ej: "Hola! Quisiera información..."'],
   ] as const;
 
   return (
@@ -528,12 +529,44 @@ function ExternalContactSettings({ settings, socials, updateSetting, updateSocia
       <section className="card card-body">
         <div className="mb-5 border-b border-gray-100 pb-5"><h4 className="font-heading text-lg font-semibold text-gray-800">Contacto e identidad global</h4><p className="mt-1 text-sm text-gray-500">Esta información se reutiliza en Contacto, Comunidad, Inicio y el pie de página.</p></div>
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-          {contactFields.map(([key, label, type]) => (
-            <div key={key} className={type === 'textarea' ? 'field-group md:col-span-2' : 'field-group'}>
-              <label className="label" htmlFor={`global-${key}`}>{label}</label>
-              {type === 'textarea' ? <textarea id={`global-${key}`} value={getSetting(key)} onChange={event => updateSetting(key, event.target.value)} rows={4} className="textarea w-full" /> : <input id={`global-${key}`} type={type} value={getSetting(key)} onChange={event => updateSetting(key, event.target.value)} className="input w-full" />}
-            </div>
-          ))}
+          {contactFields.map(([key, label, type, help]) => {
+            const value = getSetting(key);
+            const isWhatsApp = key === 'whatsapp_number';
+            const normalized = isWhatsApp ? normalizeWhatsAppNumber(value) : '';
+            const isValid = isWhatsApp ? isValidWhatsAppNumber(value) : true;
+            const formatted = isWhatsApp && value ? formatWhatsAppNumber(value) : '';
+            const previewLink = isWhatsApp && normalized ? `https://wa.me/${normalized}?text=${encodeURIComponent(getSetting('whatsapp_message') || 'Hola!')}` : '';
+
+            return (
+              <div key={key} className={type === 'textarea' ? 'field-group md:col-span-2' : 'field-group'}>
+                <label className="label" htmlFor={`global-${key}`}>{label}</label>
+                {help && <p className="mb-2 text-xs text-gray-500">{help}</p>}
+                {isWhatsApp && value && (
+                  <div className="mb-2 p-2 bg-gray-50 rounded-lg text-xs">
+                    <span className="font-medium text-gray-700">Vista previa: </span>
+                    <span className="text-gray-900 font-mono">{formatted}</span>
+                    {isValid ? (
+                      <span className="ml-2 text-green-600 flex items-center gap-1">
+                        <FiCheckCircle size={12} /> Válido para wa.me
+                      </span>
+                    ) : (
+                      <span className="ml-2 text-red-600 flex items-center gap-1">
+                        <FiAlertCircle size={12} /> Formato inválido (debe ser +593XXXXXXXXX)
+                      </span>
+                    )}
+                    {previewLink && (
+                      <a href={previewLink} target="_blank" rel="noopener noreferrer" className="ml-2 text-gold hover:underline text-xs">Probar enlace →</a>
+                    )}
+                  </div>
+                )}
+                {type === 'textarea' ? (
+                  <textarea id={`global-${key}`} value={value} onChange={event => updateSetting(key, event.target.value)} rows={4} className="textarea w-full" />
+                ) : (
+                  <input id={`global-${key}`} type={type} value={value} onChange={event => updateSetting(key, event.target.value)} className={`input w-full ${isWhatsApp && value && !isValid ? 'border-red-400 focus:border-red-500 focus:ring-red-200' : ''}`} />
+                )}
+              </div>
+            );
+          })}
         </div>
         <p className="mt-4 flex items-start gap-2 text-xs text-gray-500"><FiLink className="mt-0.5 shrink-0" />Los enlaces de Google Maps, donaciones y formularios son opcionales; si están vacíos, no se muestran.</p>
         <button type="button" onClick={saveExternal} disabled={saving} className="btn btn-primary mt-6"><FiSave /> {saving ? 'Guardando...' : 'Guardar enlaces y contacto'}</button>

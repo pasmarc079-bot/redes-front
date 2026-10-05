@@ -1,9 +1,11 @@
 import { FaWhatsapp } from 'react-icons/fa6';
 import { useSiteStore } from '../../stores/siteStore';
+import { normalizeWhatsAppNumber } from '../../utils/phone';
 
 export default function WhatsAppButton() {
   const { settings } = useSiteStore();
-  const number = settings.whatsapp_number || '593994538859';
+  const rawNumber = settings.whatsapp_number || '593994538859';
+  const number = normalizeWhatsAppNumber(rawNumber);
   const message = encodeURIComponent(settings.whatsapp_message || '¡Hola! Quisiera información sobre el Ministerio REDES.');
 
   return (
